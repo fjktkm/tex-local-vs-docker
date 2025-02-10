@@ -1,0 +1,25 @@
+name: Measure TeX Live Setup Time
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker:
+    name: Setup TeX Live with Docker
+    runs-on: ubuntu-latest
+    container:
+      image: texlive/texlive:latest
+    steps:
+      - name: Verify TeX Live Installation
+        run: pdflatex --version
+
+  local:
+    name: Setup TeX Live Locally
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install TeX Live
+        run: |
+          sudo apt update
+          sudo apt install -y texlive-full
+      - name: Verify TeX Live Installation
+        run: pdflatex --version
