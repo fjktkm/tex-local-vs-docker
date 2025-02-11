@@ -31,7 +31,7 @@ jobs:
     name: Setup TeX Live on Windows
     runs-on: windows-latest
     steps:
-      - name: Set Environment Variables
+      - name: Setup Environment
         shell: pwsh
         run: |
           echo "INSTALL_DIR=$env:TEMP\install-tl" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -48,8 +48,8 @@ jobs:
       - name: Set Installer Path
         shell: pwsh
         run: |
-          $installerDir = Get-ChildItem -Path $env:INSTALL_DIR | Where-Object { $_.Name -match "install-tl-\d+" } | Select-Object -First 1
-          echo "INSTALL_PATH=$($installerDir.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          $installerDir = Get-ChildItem -Path $env:INSTALL_DIR | Where-Object { $_.Name -match 'install-tl-\d+' } | Select-Object -First 1 -ExpandProperty FullName
+          echo "INSTALL_PATH=$installerDir" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Create Installation Profile
         shell: pwsh
