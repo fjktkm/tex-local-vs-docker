@@ -30,10 +30,13 @@ jobs:
   windows:
     name: Setup TeX Live on Windows
     runs-on: windows-latest
-    env:
-      INSTALL_DIR: ${{ runner.temp }}\install-tl
-      TEXLIVE_BIN: C:\texlive\2024\bin\windows
     steps:
+      - name: Set Environment Variables
+        shell: pwsh
+        run: |
+          echo "INSTALL_DIR=$env:TEMP\install-tl" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "TEXLIVE_BIN=C:\texlive\2024\bin\windows" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Download and Extract Installer
         shell: pwsh
         run: |
