@@ -32,11 +32,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Set Execution Policy
-        run: |
-          Set-ExecutionPolicy Bypass -Scope Process -Force
-        shell: pwsh
-
       - name: Download and Extract TeX Live Installer
         run: |
           $installerUrl = "https://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip"
