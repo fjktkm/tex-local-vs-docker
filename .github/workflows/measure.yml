@@ -30,42 +30,46 @@ jobs:
   windows:
     name: Setup TeX Live on Windows
     runs-on: windows-latest
-
+    env:
+      INSTALL_DIR: ${{ runner.temp }}\install-tl
+      TEXLIVE_BIN: C:\texlive\2024\bin\windows
     steps:
-      - name: Download and Extract TeX Live Installer
+      - name: Download and Extract Installer
+        shell: pwsh
         run: |
           $installerUrl = "https://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip"
-          $installDir = "$env:TEMP\install-tl"
-          Invoke-WebRequest -Uri $installerUrl -OutFile "$installDir.zip"
-          Expand-Archive -Path "$installDir.zip" -DestinationPath $installDir -Force
-        shell: pwsh
+          $zipPath = "$env:INSTALL_DIR.zip"
+          Invoke-WebRequest -Uri $installerUrl -OutFile $zipPath
+          Expand-Archive -Path $zipPath -DestinationPath $env:INSTALL_DIR -Force
 
-      - name: Locate Installer Directory
-        run: |
-          $installSubDir = Get-ChildItem -Path $env:TEMP\install-tl | Where-Object { $_.Name -match "install-tl-\d+" } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          echo "INSTALL_PATH=$env:TEMP\install-tl\$($installSubDir.Name)" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: Set Installer Path
         shell: pwsh
+        run: |
+          $installerDir = Get-ChildItem -Path $env:INSTALL_DIR | Where-Object { $_.Name -match "install-tl-\d+" } | Select-Object -First 1
+          echo "INSTALL_PATH=$($installerDir.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Create Installation Profile
+        shell: pwsh
         run: |
-          @"
+          $profileContent = @"
           selected_scheme scheme-full
           TEXDIR C:\texlive\2024
           option_path 1
           option_doc 0
           option_src 0
-          "@ | Out-File -Encoding ascii "$env:INSTALL_PATH\install-profile.txt"
-        shell: pwsh
+          "@
+          $profilePath = "$env:INSTALL_PATH\install-profile.txt"
+          $profileContent | Out-File -Encoding ascii $profilePath
 
       - name: Run TeX Live Installer
+        shell: pwsh
         run: |
           & "$env:INSTALL_PATH\tlpkg\tlperl\bin\perl.exe" "$env:INSTALL_PATH\install-tl" -no-gui -profile="$env:INSTALL_PATH\install-profile.txt"
-        shell: pwsh
 
       - name: Add TeX Live to PATH
-        run: echo "C:\texlive\2024\bin\windows" | Out-File -FilePath $env:GITHUB_PATH -Append
         shell: pwsh
+        run: echo "$env:TEXLIVE_BIN" | Out-File -FilePath $env:GITHUB_PATH -Append
 
       - name: Verify TeX Live Installation
-        run: lualatex --version
         shell: pwsh
+        run: lualatex --version
