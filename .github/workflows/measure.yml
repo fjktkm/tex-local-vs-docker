@@ -30,22 +30,49 @@ jobs:
   windows:
     name: Setup TeX Live on Windows
     runs-on: windows-latest
+
     steps:
-      - name: Download TeX Live Installer
+      - name: Set Execution Policy
         run: |
-          $installerUrl = "https://mirror.ctan.org/systems/texlive/tlnet/install-tl-windows.exe"
-          $installerPath = "$env:TEMP\install-tl-windows.exe"
-          Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+          Set-ExecutionPolicy Bypass -Scope Process -Force
         shell: pwsh
 
-      - name: Install TeX Live
+      - name: Download and Extract TeX Live Installer
         run: |
-          Start-Process -FilePath "$env:TEMP\install-tl-windows.exe" -ArgumentList "-no-gui" -Wait -NoNewWindow
+          $installerUrl = "https://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip"
+          $installDir = "$env:TEMP\install-tl"
+          Invoke-WebRequest -Uri $installerUrl -OutFile "$installDir.zip"
+          Expand-Archive -Path "$installDir.zip" -DestinationPath $installDir -Force
+        shell: pwsh
+
+      - name: Locate Installer Directory
+        run: |
+          $installSubDir = Get-ChildItem -Path $env:TEMP\install-tl | Where-Object { $_.Name -match "install-tl-\d+" } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          echo "INSTALL_PATH=$env:TEMP\install-tl\$($installSubDir.Name)" | Out-File -FilePath $env:GITHUB_ENV -Append
+        shell: pwsh
+
+      - name: Create Installation Profile
+        run: |
+          @"
+          selected_scheme scheme-full
+          TEXDIR C:\texlive\2024
+          option_path 1
+          option_doc 0
+          option_src 0
+          "@ | Out-File -Encoding ascii "$env:INSTALL_PATH\install-profile.txt"
+        shell: pwsh
+
+      - name: Run TeX Live Installer with Elevated Privileges
+        run: |
+          Start-Process -FilePath "$env:INSTALL_PATH\tlpkg\tlperl\bin\perl.exe" -ArgumentList "`"$env:INSTALL_PATH\install-tl`" -no-gui -profile=`"$env:INSTALL_PATH\install-profile.txt`"" -Wait -NoNewWindow
+        shell: pwsh
+
+      - name: Add TeX Live to PATH
+        run: |
+          echo "C:\texlive\2024\bin\windows" | Out-File -FilePath $env:GITHUB_PATH -Append
         shell: pwsh
 
       - name: Verify TeX Live Installation
         run: |
-          $texliveBin = "C:\texlive\2024\bin\windows"
-          $env:Path += ";$texliveBin"
           lualatex --version
         shell: pwsh
