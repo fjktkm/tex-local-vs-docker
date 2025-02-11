@@ -57,17 +57,15 @@ jobs:
           "@ | Out-File -Encoding ascii "$env:INSTALL_PATH\install-profile.txt"
         shell: pwsh
 
-      - name: Run TeX Live Installer with Elevated Privileges
+      - name: Run TeX Live Installer
         run: |
-          Start-Process -FilePath "$env:INSTALL_PATH\tlpkg\tlperl\bin\perl.exe" -ArgumentList "`"$env:INSTALL_PATH\install-tl`" -no-gui -profile=`"$env:INSTALL_PATH\install-profile.txt`"" -Wait -NoNewWindow
+          & "$env:INSTALL_PATH\tlpkg\tlperl\bin\perl.exe" "$env:INSTALL_PATH\install-tl" -no-gui -profile="$env:INSTALL_PATH\install-profile.txt"
         shell: pwsh
 
       - name: Add TeX Live to PATH
-        run: |
-          echo "C:\texlive\2024\bin\windows" | Out-File -FilePath $env:GITHUB_PATH -Append
+        run: echo "C:\texlive\2024\bin\windows" | Out-File -FilePath $env:GITHUB_PATH -Append
         shell: pwsh
 
       - name: Verify TeX Live Installation
-        run: |
-          lualatex --version
+        run: lualatex --version
         shell: pwsh
