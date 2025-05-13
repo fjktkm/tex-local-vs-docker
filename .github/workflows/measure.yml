@@ -7,11 +7,20 @@ on:
   workflow_dispatch:
 
 jobs:
-  docker:
+  dockerhub:
     name: Setup TeX Live in Docker
     runs-on: ubuntu-latest
     container:
       image: texlive/texlive:latest
+    steps:
+      - name: Verify TeX Live Installation
+        run: lualatex --version
+
+  gitlab:
+    name: Setup TeX Live in Docker
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.com/islandoftex/images/texlive:latest
     steps:
       - name: Verify TeX Live Installation
         run: lualatex --version
