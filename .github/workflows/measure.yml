@@ -7,32 +7,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  dockerhub:
-    name: Setup TeX Live in Docker (Docker Hub)
-    runs-on: ubuntu-latest
-    container:
-      image: texlive/texlive:latest
-    steps:
-      - name: Verify TeX Live Installation
-        run: lualatex --version
-
-  gitlab:
-    name: Setup TeX Live in Docker (GitLab)
-    runs-on: ubuntu-latest
-    container:
-      image: registry.gitlab.com/islandoftex/images/texlive:latest
-    steps:
-      - name: Verify TeX Live Installation
-        run: lualatex --version
-
   linux:
     name: Setup TeX Live on Linux
     runs-on: ubuntu-latest
     steps:
       - name: Install TeX Live
-        run: |
-          sudo apt update
-          sudo apt install -y texlive-full
+        run: sudo apt update && sudo apt install -y texlive-full
+      - name: Verify TeX Live Installation
+        run: lualatex --version
+
+  macos:
+    name: Setup TeX Live on macOS
+    runs-on: macos-latest
+    steps:
+      - name: Install TeX Live
+        run: brew install --cask mactex-no-gui
+      - name: Add TeX Live to PATH
+        run: echo "/Library/TeX/texbin" >> "$GITHUB_PATH"
       - name: Verify TeX Live Installation
         run: lualatex --version
 
@@ -66,7 +57,7 @@ jobs:
           $profileContent = @"
           selected_scheme scheme-full
           TEXDIR C:\texlive\2024
-          option_path 1
+          option_path 0
           option_doc 0
           option_src 0
           "@
@@ -84,4 +75,31 @@ jobs:
 
       - name: Verify TeX Live Installation
         shell: pwsh
+        run: lualatex --version
+
+  nix:
+    name: Setup TeX Live with Nix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+      - name: Verify TeX Live Installation
+        run: nix shell nixpkgs#texlive.combined.scheme-full --command lualatex --version
+
+  dockerhub:
+    name: Setup TeX Live in Docker (Docker Hub)
+    runs-on: ubuntu-latest
+    container:
+      image: texlive/texlive:latest
+    steps:
+      - name: Verify TeX Live Installation
+        run: lualatex --version
+
+  gitlab:
+    name: Setup TeX Live in Docker (GitLab)
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.com/islandoftex/images/texlive:latest
+    steps:
+      - name: Verify TeX Live Installation
         run: lualatex --version
