@@ -1,14 +1,16 @@
-name: Measure TeX Live Setup Time
+name: TeX Live Setup Benchmark
 
 on:
   push:
     branches:
       - main
+  schedule:
+    - cron: "0 0 1 * *"
   workflow_dispatch:
 
 jobs:
   linux:
-    name: Setup TeX Live on Linux
+    name: Linux
     runs-on: ubuntu-latest
     steps:
       - name: Install TeX Live
@@ -17,7 +19,7 @@ jobs:
         run: lualatex --version
 
   macos:
-    name: Setup TeX Live on macOS
+    name: macOS
     runs-on: macos-latest
     steps:
       - name: Install TeX Live
@@ -28,7 +30,7 @@ jobs:
         run: lualatex --version
 
   windows:
-    name: Setup TeX Live on Windows
+    name: Windows
     runs-on: windows-latest
     steps:
       - name: Setup Environment
@@ -78,7 +80,7 @@ jobs:
         run: lualatex --version
 
   nix:
-    name: Setup TeX Live with Nix
+    name: Nix
     runs-on: ubuntu-latest
     steps:
       - name: Install Nix
@@ -87,7 +89,7 @@ jobs:
         run: nix shell nixpkgs#texlive.combined.scheme-full --command lualatex --version
 
   dockerhub:
-    name: Setup TeX Live in Docker (Docker Hub)
+    name: Docker (Docker Hub)
     runs-on: ubuntu-latest
     container:
       image: texlive/texlive:latest
@@ -96,7 +98,7 @@ jobs:
         run: lualatex --version
 
   gitlab:
-    name: Setup TeX Live in Docker (GitLab)
+    name: Docker (GitLab)
     runs-on: ubuntu-latest
     container:
       image: registry.gitlab.com/islandoftex/images/texlive:latest
