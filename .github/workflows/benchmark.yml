@@ -1,12 +1,12 @@
 name: TeX Live Setup Benchmark
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
   schedule:
-    - cron: "0 0 1 * *"
-  workflow_dispatch:
+    - cron: '0 9 * * 1'
 
 jobs:
   linux:
